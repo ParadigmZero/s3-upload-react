@@ -1,18 +1,29 @@
 import React, { useState } from 'react';
 import { uploadFile } from 'react-s3';
 
+
+const {
+  REACT_APP_BUCKETNAME,
+  REACT_APP_REGION,
+  REACT_APP_ACCESS_KEY_ID,
+  REACT_APP_SECRET_ACCESS_KEY,
+} = process.env;
+
+
 const config = {
-  bucketName: '',
-  dirName: '',
-  region: '',
-  accessKeyId: '',
-  secretAccessKey: '',
+  bucketName: REACT_APP_BUCKETNAME,
+  region: REACT_APP_REGION,
+  accessKeyId: REACT_APP_ACCESS_KEY_ID,
+  secretAccessKey: REACT_APP_SECRET_ACCESS_KEY,
 };
+
 
 function App() {
   const [selectedFile, setSelectedFile] = useState();
 
   const [isSelected, setIsSelected] = useState(false);
+
+  const [url, setUrl] = useState("");
 
 
   const browseClick = (event) => {
@@ -22,11 +33,13 @@ function App() {
 
   const uploadClick = () => {
 
+    // we are putting the file in a directory that is a very simple form of timestamp
     config.dirName = Date.now();
 
     uploadFile(selectedFile, config)
       .then((data) => {
-        console.log(`https://${config.bucketName}.s3.${config.region}.amazonaws.com/${config.dirName}/${selectedFile.name}`);
+        setUrl(`https://${config.bucketName}.s3.${config.region}.amazonaws.com/${config.dirName}/${selectedFile.name}`)
+        console.log(url);
       })
       .catch(
         (err) => { alert(err) }
@@ -54,9 +67,16 @@ function App() {
       ) : (
         <p>Select a file to show details</p>
       )}
-      <div>
-        <button onClick={uploadClick}>Submit</button>
-      </div>
+
+      <button onClick={uploadClick} disabled={!isSelected}>Submit</button>
+      {(url !== "") ? (
+        <>
+          <br />
+        file uploaded to:<br />
+          {url}
+        </>
+      ) : <></>
+      }
     </div>
   );
 
