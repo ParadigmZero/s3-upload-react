@@ -39,7 +39,6 @@ function App() {
     uploadFile(selectedFile, config)
       .then((data) => {
         setUrl(`https://${config.bucketName}.s3.${config.region}.amazonaws.com/${config.dirName}/${selectedFile.name}`)
-        console.log(url);
       })
       .catch(
         (err) => { alert(err) }
