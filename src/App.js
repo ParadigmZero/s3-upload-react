@@ -1,21 +1,28 @@
 import React, { useState } from 'react';
-import { uploadFile } from 'react-s3';
+// import { uploadFile } from 'react-s3';
+import AWS from 'aws-sdk'
+// import {S3} from '@aws-sdk/client-s3';
 
 
-const {
-  REACT_APP_BUCKETNAME,
-  REACT_APP_REGION,
-  REACT_APP_ACCESS_KEY_ID,
-  REACT_APP_SECRET_ACCESS_KEY,
-} = process.env;
+// const {
+//   REACT_APP_BUCKETNAME,
+//   REACT_APP_REGION,
+//   REACT_APP_ACCESS_KEY_ID,
+//   REACT_APP_SECRET_ACCESS_KEY,
+// } = process.env;
 
 
-const config = {
-  bucketName: REACT_APP_BUCKETNAME,
-  region: REACT_APP_REGION,
-  accessKeyId: REACT_APP_ACCESS_KEY_ID,
-  secretAccessKey: REACT_APP_SECRET_ACCESS_KEY,
-};
+// const config = {
+//   bucketName: REACT_APP_BUCKETNAME,
+//   region: REACT_APP_REGION,
+//   accessKeyId: REACT_APP_ACCESS_KEY_ID,
+//   secretAccessKey: REACT_APP_SECRET_ACCESS_KEY,
+// };
+
+const s3 = new AWS.S3({
+  accessKeyId: process.env.REACT_APP_AWS_S3_ACCESS_KEY_ID,
+  secretAccessKey: process.env.REACT_APP_AWS_S3_SECRET_ACCESS_KEY,
+});
 
 
 function App() {
@@ -31,18 +38,44 @@ function App() {
     setIsSelected(true);
   };
 
-  const uploadClick = () => {
+  async function uploadClick() {
 
     // we are putting the file in a directory that is a very simple form of timestamp
-    config.dirName = Date.now();
+    // config.dirName = Date.now();
 
-    uploadFile(selectedFile, config)
-      .then((data) => {
-        setUrl(`https://${config.bucketName}.s3.${config.region}.amazonaws.com/${config.dirName}/${selectedFile.name}`)
-      })
-      .catch(
-        (err) => { alert(err) }
-      )
+    // uploadFile(selectedFile, config)
+    //   .then((data) => {
+    //     setUrl(`https://${config.bucketName}.s3.${config.region}.amazonaws.com/${config.dirName}/${selectedFile.name}`)
+    //   })
+    //   .catch(
+    //     (err) => { alert(err) }
+    //   )
+
+    console.log(selectedFile.type);
+    console.log(process.env);
+
+    const uploadedImage = await s3.upload({
+        Bucket: process.env.REACT_APP_AWS_S3_BUCKET_NAME,
+        ContentType: selectedFile.type,
+        ACL: 'public-read',
+        Key: selectedFile.name,
+        Body: selectedFile,
+      }).promise();
+
+
+      console.log("results from s3");
+    //   console.log(typeof(uploadedImage));
+    // console.log(uploadedImage);
+
+
+    // const uploadedImage = await s3.upload({
+    //   Bucket: process.env.AWS_S3_BUCKET_NAME,
+    //   Key: req.files[0].originalFilename,
+    //   Body: blob,
+    // }).promise();
+
+    console.log(uploadedImage);
+
 
     setIsSelected(false);
     setSelectedFile();
