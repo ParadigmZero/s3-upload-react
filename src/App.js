@@ -74,7 +74,7 @@ function App() {
     //   Body: blob,
     // }).promise();
 
-    console.log(uploadedImage);
+    console.log(uploadedImage.Location);
 
 
     setIsSelected(false);
